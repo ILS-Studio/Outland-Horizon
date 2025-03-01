@@ -1,5 +1,7 @@
 package com.arc.outland_horizon.client.gui.overlay;
 
+import com.fho4565.brick_lib.variables.PlayerVariables;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
@@ -14,6 +16,14 @@ public class PlayerOverlay implements IGuiOverlay {
         hudSections.add(new HealthBar());
         hudSections.add(new ManaBar());
         hudSections.add(new SkillBar());
+        hudSections.add(new HudSection() {
+            @Override
+            public void render(Minecraft minecraft, GuiGraphics guiGraphics) {
+                PlayerVariables.clientIntValue("k").ifPresent(integer -> {
+                    guiGraphics.drawString(minecraft.font, String.valueOf(integer), 30, 30, -1);
+                });
+            }
+        });
     }
 
     public static PlayerOverlay of() {

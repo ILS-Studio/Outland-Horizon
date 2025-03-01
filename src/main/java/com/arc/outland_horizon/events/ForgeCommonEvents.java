@@ -206,7 +206,7 @@ public class ForgeCommonEvents {
     }
 
     @SubscribeEvent
-    public void onLivingHeal(LivingHealEvent event) {
+    public static void onLivingHeal(LivingHealEvent event) {
     }
 
     @SubscribeEvent

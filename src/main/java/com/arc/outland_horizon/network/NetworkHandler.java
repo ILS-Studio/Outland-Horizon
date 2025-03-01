@@ -23,11 +23,6 @@ public class NetworkHandler {
                 PROTOCOL_VERSION::equals,
                 PROTOCOL_VERSION::equals
         );
-        INSTANCE.messageBuilder(ServerModifyAttributesPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .decoder(ServerModifyAttributesPacket::new)
-                .encoder(ServerModifyAttributesPacket::encode)
-                .consumerMainThread(ServerModifyAttributesPacket::handle)
-                .add();
 
         INSTANCE.messageBuilder(ServerAttributeSyncPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .decoder(ServerAttributeSyncPacket::new)

@@ -1,5 +1,6 @@
 package com.arc.outland_horizon.utils;
 
+import com.arc.outland_horizon.core.SeedXZRandom;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -7,6 +8,9 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Utils {
@@ -50,4 +54,59 @@ public class Utils {
         }
         return ThreadLocalRandom.current().nextDouble() < chance;
     }
+
+    public static int[] randomIndexes(int seed, int indexes, int count) {
+        if (indexes <= 0 || count <= 0) {
+            throw new IllegalArgumentException("indexes and count > 0");
+        }
+        if (count > indexes) {
+            throw new IllegalArgumentException("count must <= indexes");
+        }
+        List<Integer> pool = new ArrayList<>(indexes);
+        for (int i = 0; i < indexes; i++) {
+            pool.add(i);
+        }
+        int[] result = new int[count];
+        for (int i = 0; i < count; i++) {
+            int randomIndex = ThreadLocalRandom.current().nextInt(indexes - i);
+            result[i] = pool.get(randomIndex);
+            int lastValidIndex = indexes - i - 1;
+            pool.set(randomIndex, pool.get(lastValidIndex));
+        }
+        return result;
+    }
+
+    public static Point[] randomPoints(long seed, int cx, int cz, int xMin, int yMin, int xMax, int yMax, int count) {
+        if (count <= 0) {
+            throw new IllegalArgumentException("count > 0");
+        }
+        int width = xMax - xMin + 1;
+        int height = yMax - yMin + 1;
+        int totalPoints = width * height;
+        if (count > totalPoints) {
+            throw new IllegalArgumentException("to big number : count");
+        }
+        Point[] pointsArray = new Point[totalPoints];
+        int index = 0;
+        for (int x = xMin; x <= xMax; x++) {
+            for (int y = yMin; y <= yMax; y++) {
+                pointsArray[index++] = new Point(x, y);
+            }
+        }
+        SeedXZRandom random = new SeedXZRandom(seed);
+        Point[] result = new Point[count];
+        for (int i = 0; i < count; i++) {
+            int remaining = totalPoints - i;
+            int lastValidIndex = remaining - 1;
+
+            int randomIndex = random.sample(cx, cz, 0, lastValidIndex);
+            result[i] = pointsArray[randomIndex];
+
+            if (randomIndex != lastValidIndex) {
+                pointsArray[randomIndex] = pointsArray[lastValidIndex];
+            }
+        }
+        return result;
+    }
+
 }

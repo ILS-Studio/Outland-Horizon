@@ -2,6 +2,7 @@ package com.arc.outland_horizon.world.dimension.matrix;
 
 import com.arc.outland_horizon.registry.OHBiomes;
 import com.arc.outland_horizon.world.dimension.matrix.rooms.EmptyRoom;
+import com.arc.outland_horizon.world.dimension.matrix.rooms.MonsterRoom;
 import com.arc.outland_horizon.world.dimension.matrix.rooms.RewardRoom;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.biome.MobSpawnSettings;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -36,15 +38,16 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MatrixChunkGenerator extends ChunkGenerator {
+    RoomRandom random;
+
     public static final Codec<MatrixChunkGenerator> CODEC = RecordCodecBuilder.create((p_255576_) -> {
         return p_255576_.group(RegistryOps.retrieveElement(OHBiomes.MATRIX)).apply(p_255576_, p_255576_.stable(MatrixChunkGenerator::new));
     });
-    private final long seed;
 
 
     public MatrixChunkGenerator(Holder.Reference<Biome> biomeReference) {
         super(new FixedBiomeSource(biomeReference));
-        seed = ThreadLocalRandom.current().nextLong();
+        random = new RoomRandom(ThreadLocalRandom.current().nextLong());
     }
 
     @Override
@@ -69,11 +72,21 @@ public class MatrixChunkGenerator extends ChunkGenerator {
 
     @Override
     public void buildSurface(WorldGenRegion level, StructureManager pStructureManager, RandomState pRandom, ChunkAccess chunk) {
-
+        BlockPos chunkPos = chunk.getPos().getWorldPosition().offset(0, 0, -1);
+        BlockPos pos1 = chunkPos.offset(1, 1, 2);
+        BlockPos pos2 = chunkPos.offset(14, 15, 15);
+        chunk.setBlockState(pos1, Blocks.GRASS_BLOCK.defaultBlockState(), false);
+        chunk.setBlockState(pos2, Blocks.STONE.defaultBlockState(), false);
+        RoomType roomType = random.sample(chunkPos.getX(), chunkPos.getZ());
+        switch (roomType) {
+            case EMPTY -> new EmptyRoom().place(chunk, chunkPos);
+            case REWARD -> new RewardRoom(level.getSeed()).place(chunk, chunkPos);
+            case MONSTER -> new MonsterRoom(level.getSeed()).place(chunk, chunkPos);
+        }
     }
 
     @Override
-    public void spawnOriginalMobs(WorldGenRegion pLevel) {
+    public void spawnOriginalMobs(WorldGenRegion level) {
 
     }
 
@@ -84,15 +97,7 @@ public class MatrixChunkGenerator extends ChunkGenerator {
 
     @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunk) {
-        int chunkX = chunk.getPos().x;
-        int chunkZ = chunk.getPos().z;
-        long chunkSeed = seed + (long) chunkX * chunkZ;
-        boolean next = chunkSeed % 2 == 0;
-        if (next) {
-            new EmptyRoom().place(chunk, BlockPos.containing(chunkX, 0, chunkZ));
-        } else {
-            new RewardRoom().place(chunk, BlockPos.containing(chunkX, 0, chunkZ));
-        }
+
         return CompletableFuture.completedFuture(chunk);
     }
 
@@ -123,14 +128,6 @@ public class MatrixChunkGenerator extends ChunkGenerator {
 
     @Override
     public void addDebugScreenInfo(List<String> infos, RandomState randomState, BlockPos blockPos) {
-        int chunkX = blockPos.getX() / 16;
-        int chunkZ = blockPos.getZ() / 16;
-        long chunkSeed = seed + (long) chunkX * chunkZ;
-        boolean next = chunkSeed % 2 == 0;
-        if (next) {
-            infos.add("Current room : empty");
-        } else {
-            infos.add("Current room : reward");
-        }
+
     }
 }

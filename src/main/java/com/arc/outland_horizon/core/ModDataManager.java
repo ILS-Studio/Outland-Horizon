@@ -2,7 +2,7 @@ package com.arc.outland_horizon.core;
 
 import com.arc.outland_horizon.OutlandHorizon;
 import com.arc.outland_horizon.utils.Utils;
-import com.fho4565.brick_lib.WorldUtils;
+import com.fho4565.brick_lib.Constants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.MinecraftServer;
@@ -48,7 +48,7 @@ public class ModDataManager {
 
     private static class OHData {
         public OHData(MinecraftServer server) {
-            file = new File(WorldUtils.getWorldFolderPath(server) + "\\data\\outland_horizon.dat");
+            file = new File(Constants.worldFolder() + "\\data\\outland_horizon.dat");
             if (!file.exists()) {
                 try {
                     if (!file.createNewFile()) {

@@ -21,7 +21,10 @@ repositories {
     }
     maven {
         url "https://cursemaven.com"
-        content { includeGroup "curse.maven" }
+        content {
+            includeGroup "curse.maven"
+            allowInsecureProtocol = true
+        }
     }
     mavenCentral()
     gradlePluginPortal()
@@ -95,7 +98,7 @@ dependencies {
 
 
     implementation fg.deobf("snownee.jade:Jade:1.20.1.11.12.1")
-
+    
 
     implementation fg.deobf('blank:brick_lib-1.20.1:1.0.0')
     compileOnly files('libs/brick_lib-1.20.1-1.0.0.jar')

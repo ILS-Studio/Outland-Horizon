@@ -9,15 +9,20 @@ import com.arc.outland_horizon.utils.Utils;
 import com.arc.outland_horizon.utils.WorldUtils;
 import com.arc.outland_horizon.world.item.ICooldownItem;
 import com.arc.outland_horizon.world.item.ISkillItem;
+import com.fho4565.brick_lib.variables.PlayerVariables;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.jetbrains.annotations.NotNull;
 
@@ -119,6 +124,26 @@ public class ModCommands {
                 modFileInfo.getMods().forEach(iModInfo -> System.out.println(iModInfo.getModId()));
                 System.out.println("------");
             });
+            return 1;
+        }));
+        dispatcher.register(Commands.literal("cap")
+                .then(Commands.argument("integer", IntegerArgumentType.integer())
+                        .executes(context -> {
+                            PlayerVariables.setIntValue(context.getSource().getPlayerOrException(), "k", IntegerArgumentType.getInteger(context, "integer"));
+                            return 1;
+                        })
+                )
+        );
+        dispatcher.register(Commands.literal("chunkPos").executes(context -> {
+            Vec3 vec3 = context.getSource().getPosition();
+            context.getSource().sendSystemMessage(Component.literal("=========="));
+            context.getSource().sendSystemMessage(Component.literal("x:" + vec3.x));
+            context.getSource().sendSystemMessage(Component.literal("y:" + vec3.y));
+            context.getSource().sendSystemMessage(Component.literal("z:" + vec3.z));
+            BlockPos pos = new BlockPos((int) Math.floor(vec3.x),
+                    (int) Math.floor(vec3.y),
+                    (int) Math.floor(vec3.z));
+            context.getSource().sendSystemMessage(Component.literal("chunkX:" + new ChunkPos(pos)));
             return 1;
         }));
     }
